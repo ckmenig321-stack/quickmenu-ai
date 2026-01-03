@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>QuickMenu AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 30px;
+    }
+
+    h1, h2 {
+      color: #f9fafb;
+    }
+
+    p {
+      color: #cbd5f5;
+      line-height: 1.6;
+    }
+
+    .card {
+      background: #020617;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 6px;
+      border: none;
+      background: #020617;
+      color: white;
+    }
+
+    textarea {
+      min-height: 80px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: #3b82f6;
+      color: white;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #2563eb;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      color: #e5e7eb;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>QuickMenu AI</h1>
+    <p>Create a professional restaurant menu in minutes using AI.</p>
+
+    <div class="card">
+      <h2>Generate Your Menu</h2>
+
+      <form onsubmit="submitMenu(event)">
+        <label>Restaurant Name</label>
+        <input id="r_name" required />
+
+        <label>City & State</label>
+        <input id="r_city" required />
+
+        <label>Cuisine Type</label>
+        <input id="r_cuisine" required />
+
+        <label>Price Level</label>
+        <select id="r_price">
+          <option>$</option>
+          <option>$$</option>
+          <option>$$$</option>
+        </select>
+
+        <label>Restaurant Style</label>
+        <select id="r_style">
+          <option>Casual</option>
+          <option>Modern</option>
+          <option>Upscale</option>
+          <option>Fast Casual</option>
+        </select>
+
+        <label>Dietary Options (optional)</label>
+        <input id="r_diet" />
+
+        <label>Extra Notes (optional)</label>
+        <textarea id="r_notes"></textarea>
+
+        <button type="submit">Generate Menu</button>
+      </form>
+    </div>
+
+    <div id="output" class="card hidden">
+      <h2>Your Generated Menu</h2>
+      <pre id="menuText"></pre>
+    </div>
+  </div>
+
+  <script>
+    async function submitMenu(e) {
+      e.preventDefault();
+
+      const data = {
+        restaurant: document.getElementById("r_name").value,
+        city: document.getElementById("r_city").value,
+        cuisine: document.getElementById("r_cuisine").value,
+        price: document.getElementById("r_price").value,
+        style: document.getElementById("r_style").value,
+        dietary: document.getElementById("r_diet").value,
+        notes: document.getElementById("r_notes").value
+      };
+
+      const output = document.getElementById("output");
+      const menuText = document.getElementById("menuText");
+
+      output.classList.remove("hidden");
+      menuText.textContent = "Generating menu... please wait";
+
+      try {
+        const res = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+          menuText.textContent = "Error: " + (result.error || "Something went wrong");
+          return;
+        }
+
+        menuText.textContent = result.menu;
+      } catch (err) {
+        menuText.textContent = "Error connecting to server.";
+      }
+    }
+  </script>
+</body>
+</html>
